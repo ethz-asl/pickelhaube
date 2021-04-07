@@ -1,0 +1,26 @@
+<launch>
+
+  <!-- Record Bagfile -->
+  <node name="rosbag_record"
+        pkg="rosbag"
+        type="record"
+        output="screen"
+        respawn="false"
+        args="-o /home/smb/pickelhaube /rslidar_points /versavis/cam0/image_raw /versavis/cam1/image_raw /versavis/cam2/image_raw /versavis/imu">
+  </node>
+
+  <!-- Launch Cameras -->
+  <include file="$(find pickelhaube)/launch/run_versavis.launch" />
+
+  <!-- Launch the Robosense LiDAR -->
+  <include file="$(find smb_lpc)/launch/sensors.launch">
+    <arg name="launch_joystick"          value="false"/>
+    <arg name="launch_rgb_cam"           value="false"/>
+    <arg name="launch_depth_cam"         value="false"/>
+    <arg name="launch_tracking_cam"      value="true"/>
+  </include>
+
+  <!-- Lauch Wheel Odometry -->
+  <!-- include -->
+  <!-- include file="$(find smb_lowlevel_controller)/launch/smb_lowlevel_controller.launch" /-->
+</launch>
