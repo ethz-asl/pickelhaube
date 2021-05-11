@@ -1,0 +1,53 @@
+<launch>
+
+  <!-- Launch Versavis and Cameras -->
+  <include file="$(find pickelhaube)/launch/run_versavis.launch" />
+
+  <!-- Launch Azure Kinect -->
+  <include file="$(find pickelhaube)/launch/azure_addon/azure_driver.launch" />
+
+  <!-- Launch the Robosense LiDAR -->
+  <arg name="model" default="RS16" />
+  <arg name="device_ip" default="11.0.0.3" />
+  <arg name="msop_port" default="6699" />
+  <arg name="difop_port" default="7788" />
+  <arg name="lidar_param_path" default="$(find rslidar_pointcloud)/data/rs_lidar_16/"/>
+
+  <node  name="rslidar_node" pkg="rslidar_driver" type="rslidar_node" output="screen" >
+    <param name="model" value="$(arg model)"/>
+    <param name="device_ip" value="$(arg device_ip)" />
+    <param name="msop_port" value="$(arg msop_port)" />
+    <param name="difop_port" value="$(arg difop_port)"/>
+  </node>
+  <node  name="cloud_node" pkg="rslidar_pointcloud" type="cloud_node" output="screen" >
+    <param name="model" value="$(arg model)"/>
+    <param name="curves_path" value="$(arg lidar_param_path)/curves.csv" />
+    <param name="angle_path" value="$(arg lidar_param_path)/angle.csv" />
+    <param name="channel_path" value="$(arg lidar_param_path)/ChannelNum.csv" />
+    <param name="max_distance" value="20"/>
+    <param name="min_distance" value="0.5"/>
+    <param name="resolution_type" value="0.5cm"/>
+    <param name="intensity_mode" value="1"/>
+  </node>
+
+  <!-- Tracking Camera -->
+  <arg name="camera_name" value="realsense_t265" />
+  <arg name="tracking_cam_calib_odom_file"         default="$(find pickelhaube)/config/tracking_camera_config.json"/>
+  <group ns="$(arg camera_name)">
+    <include file="$(find realsense2_camera)/launch/includes/nodelet.launch.xml">
+      <arg name="tf_prefix"                value="$(arg camera_name)"/>
+      <arg name="serial_no"                value=""/>
+      <arg name="usb_port_id"              value=""/>
+      <arg name="device_type"              value="t265"/>
+      <arg name="enable_pose"              value="true"/>
+      <arg name="enable_accel"             value="true"/>
+      <arg name="enable_gyro"              value="true"/>
+      <arg name="publish_odom_tf"          value="true"/>
+      <arg name="topic_odom_in"            value="/wheel_odometry"/>
+      <arg name="unite_imu_method"         value="linear_interpolation"/>
+      <arg name="calib_odom_file"          value="$(arg tracking_cam_calib_odom_file)"/>
+    </include>
+  </group>
+
+
+</launch>
